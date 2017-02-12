@@ -8,4 +8,4 @@ Gibran Curtiss Salomão
 </a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 
 Based on a work at https://github.com/PantalaLabs/Euclidean.
-Permissions beyond the scope of this license may be available at http://creativecommons.org/licenses/by-sa/3.0/.
+Permissions beyond the scope of this license may be available at https://creativecommons.org/licenses/
