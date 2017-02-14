@@ -4,7 +4,7 @@ Creative Commons License
 
 Step Sequencer with Euclidean Rhythm Generator by Gibran Curtiss Salomão is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License. Based on a work at https://github.com/PantalaLabs/Euclidean. Permissions beyond the scope of this license may be available at http://creativecommons.org/licenses/by-sa/3.0/.
 
-    Gibran Curtiss Salomão. CC-BY-SA
+    Gibran Curtiss Salomão. CC-BY-NC-SA
 */
 
 #include <TimerOne.h>
