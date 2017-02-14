@@ -12,4 +12,4 @@ Permissions beyond the scope of this license may be available at https://creativ
 
 In a special agreement between <a rel="AISynthesis" href="http://aisynthesis.com/">AI Synthesis</a> and <a rel="site" href="https://www.facebook.com/pantalalabs/">
 Pantala Labs
-</a>, we are proud to notice that the module "Step Sequencer with Euclidean Rhythm Generator" will be produced within the eurorack standards by <a rel="AISynthesis" href="http://aisynthesis.com/">AI Synthesis</a>. We estimate that in a period of 3 to 4 months the module will be ready.
+</a>, we are proud to notice that the module "Step Sequencer with Euclidean Rhythm Generator" will be produced within the eurorack standards by <a rel="AISynthesis" href="http://aisynthesis.com/">AI Synthesis</a>.
