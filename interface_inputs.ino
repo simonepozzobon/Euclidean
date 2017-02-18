@@ -1,10 +1,12 @@
-/*  This is the code for a Step Sequencer with Euclidean Rythm Generator 
+/*Step Sequencer with Euclidean Rythm Generator 
  
 Creative Commons License
 
-Step Sequencer with Euclidean Rhythm Generator by Gibran Curtiss Salomão is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License. Based on a work at https://github.com/PantalaLabs/Euclidean. Permissions beyond the scope of this license may be available at http://creativecommons.org/licenses/by-sa/3.0/.
+Step Sequencer with Euclidean Rhythm Generator by Pantala Labs 
+is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+Based on a work at https://github.com/PantalaLabs/Euclidean.
 
-    Gibran Curtiss Salomão. CC-BY-NC-SA
+Gibran Curtiss Salomão. FEB/2017 - CC-BY-NC-SA
 */
 
 
@@ -49,7 +51,7 @@ void readClockSourceButton() {
 //in this module it wasnt necessary with other tasks but is a good and fun practice
 //
 void readEncoderShift() {
-  long newEncoderShiftPosition = encoderShift.read();
+  long newEncoderShiftPosition = encoderA.read();
   if (newEncoderShiftPosition != oldEncoderShiftPosition) {   //if there was a change in encoder position
     if ( (newEncoderShiftPosition % 4) == 0 ) {                   //mod 4 changes
       if (oldEncoderShiftPosition < newEncoderShiftPosition) {
@@ -71,7 +73,7 @@ void readEncoderShift() {
 
 //read the speed encoder 
 void readEncoderSpeed() {
-  long newEncoderSpeedPosition = encoderSpeed.read();
+  long newEncoderSpeedPosition = encoderB.read();
   if (newEncoderSpeedPosition != oldEncoderSpeedPosition) {           //if there was a change in encoder position
     encoderSpeedValue = encoderSpeedCenter + newEncoderSpeedPosition; //update old position with  new position
     if (encoderSpeedValue < encoderSpeedMinValue) {
@@ -81,7 +83,7 @@ void readEncoderSpeed() {
       encoderSpeedValue = encoderSpeedMaxValue;
     }
     oldEncoderSpeedPosition = newEncoderSpeedPosition;
-    tickInterval = encoderSpeedValue;                                 //sets the tickInterval variable with the new calculated interval
+    tickInterval = (encoderSpeedValue*encoderSpeedStepValue);                                 //sets the tickInterval variable with the new calculated interval
     interfaceDebounce = interfaceNormalDebounce;
     markThisEvent();
   }
@@ -89,11 +91,11 @@ void readEncoderSpeed() {
 
 //read the K euclidean encoder
 void readEncoderEuclidKParm() {
-  long newEncoderKPosition = encoderK.read();
+  long newEncoderKPosition = encoderA.read();
   if (newEncoderKPosition != oldEncoderKPosition) {       //if there was a change in encoder position
     if ( (newEncoderKPosition % 4) == 0 ) {               //mod 4 changes (debounce like to make the interface less sensitive)
       if (newEncoderKPosition < oldEncoderKPosition) {
-        if (euclidParm1 - 1 >= 0) {
+        if (euclidParm1 - 1 > 0) {
           euclidParm1--;
         }
       }
@@ -111,7 +113,7 @@ void readEncoderEuclidKParm() {
 }
 
 void readEncoderEuclidNParm() {
-  long newEncoderNPosition = encoderN.read();
+  long newEncoderNPosition = encoderB.read();
   if (newEncoderNPosition != oldEncoderNPosition) {         //if there was a change in encoder position
     if ( (newEncoderNPosition % 4) == 0 ) {                 //mod 4 changes (debounce like to make the interface less sensitive)
       if (newEncoderNPosition < oldEncoderNPosition) {
