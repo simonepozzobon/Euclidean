@@ -4,7 +4,7 @@ ReadMe file
 Gibran Curtiss Salomão Feb/2017  
 
 ##Introduction
-The **Step Sequencer with Euclidean Rhythm Generator** is a 8 channels step sequencer created to control other synthesizers.
+The **Step Sequencer with Euclidean Rhythm Generator** is an 8 channels step sequencer created to control other synthesizers.
 The primary aim of the **Step Sequencer with Euclidean Rhythm Generator** is to generate organized triggers to 
 syncronize it with other synthesizer modules and generate/erase/modify Euclidean Rhythm sequences with the aid of a easy interface.
 Other resources are available:
