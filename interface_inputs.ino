@@ -1,37 +1,35 @@
-/*Step Sequencer with Euclidean Rythm Generator 
- 
-Creative Commons License
+/*Step Sequencer with Euclidean Rythm Generator
 
-Step Sequencer with Euclidean Rhythm Generator by Pantala Labs 
-is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-Based on a work at https://github.com/PantalaLabs/Euclidean.
+  Creative Commons License
 
-Gibran Curtiss Salomão. FEB/2017 - CC-BY-NC-SA
+  Step Sequencer with Euclidean Rhythm Generator by Pantala Labs
+  is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+  Based on a work at https://github.com/PantalaLabs/Euclidean.
+
+  Gibran Curtiss Salomão. FEB/2017 - CC-BY-NC-SA
 */
 
 
 //clock source button
 void readClockSourceButton() {
-  if ( (digitalRead(clockInButtonPin) == HIGH) && (!externalClock) ) {
-    //EXTERNAL clock
-    externalClock = true;
-    oldTickInterval = tickInterval; //save the interval timer to restore if come back to internal clock
-    Timer1.stop();
-    Timer1.detachInterrupt();
-    attachInterrupt(digitalPinToInterrupt(clockInPin), tickInterrupt, RISING);
-    tickLast = millis();
-    markThisEvent();
-    interfaceDebounce = interfaceSuperDebounce;
-  }
-  else if ( (digitalRead(clockInButtonPin) == LOW) && (externalClock) ) {
-    //INTERNAL clock
-    externalClock = false;
-    detachInterrupt(digitalPinToInterrupt(clockInPin));
-    tickInterval = oldTickInterval;
-    timerOneInterval = oldTickInterval * 1000;
-    Timer1.initialize(timerOneInterval);
-    Timer1.attachInterrupt(tickInterrupt);
-    Timer1.restart();
+  if (digitalRead(clockInButtonPin) == HIGH) {
+    if (internalClock) {
+      //becomes EXTERNAL clock
+      internalClock = false;
+      oldTickInterval = tickInterval; //save the interval timer to restore if come back to internal clock
+      Timer1.stop();
+      Timer1.detachInterrupt();
+      attachInterrupt(digitalPinToInterrupt(clockInPin), tickInterrupt, RISING);
+      tickLast = millis();
+    } else {
+      //becomes INTERNAL clock
+      internalClock = true;
+      detachInterrupt(digitalPinToInterrupt(clockInPin));
+      tickInterval = oldTickInterval;
+      Timer1.initialize(tickInterval * 1000);
+      Timer1.attachInterrupt(tickInterrupt);
+      Timer1.restart();
+    }
     markThisEvent();
     interfaceDebounce = interfaceSuperDebounce;
   }
@@ -71,7 +69,7 @@ void readEncoderShift() {
   }
 }
 
-//read the speed encoder 
+//read the speed encoder
 void readEncoderSpeed() {
   long newEncoderSpeedPosition = encoderB.read();
   if (newEncoderSpeedPosition != oldEncoderSpeedPosition) {           //if there was a change in encoder position
@@ -83,7 +81,7 @@ void readEncoderSpeed() {
       encoderSpeedValue = encoderSpeedMaxValue;
     }
     oldEncoderSpeedPosition = newEncoderSpeedPosition;
-    tickInterval = (encoderSpeedValue*encoderSpeedStepValue);                                 //sets the tickInterval variable with the new calculated interval
+    tickInterval = encoderSpeedValue * encoderSpeedStepValue;         //sets the tickInterval variable with the new calculated interval
     interfaceDebounce = interfaceNormalDebounce;
     markThisEvent();
   }
@@ -266,6 +264,7 @@ void giveUpAddEuclid() {
 //shift the euclidean sequence backward or forward
 void shiftMatrixRow(int row, boolean way) {
   boolean spare;
+  //rotate forward
   if (way) {
     spare = matrix[row][15];
     for (int col = 15; col > 0 ; col--) {
@@ -273,6 +272,7 @@ void shiftMatrixRow(int row, boolean way) {
     }
     matrix[row][0] = spare;
   }
+  //rotate backward
   else {
     spare = matrix[row][0];
     for (int col = 0; col < 15; col++) {
@@ -280,10 +280,40 @@ void shiftMatrixRow(int row, boolean way) {
     }
     matrix[row][15] = spare;
   }
+  //update the screens
+
   for (int col = 0; col < 16; col++) {
     lc.setLed(col / 8, col % 8, 7 - row, matrix[row][col]);
   }
+
+  //  //update the screens
+  //  int setColumnValue = 0;
+  //  int power = 8;
+  //  int powerValue = 0;
+  //  for (int col = 0; col < 8; col++) {
+  //    power = power - 1;
+  //    if(matrix[row][col]==1){
+  //      powerValue = (int)1<<power;
+  //      setColumnValue = setColumnValue + powerValue;
+  //    }
+  //  }
+  //  lc.setColumn(0, 7 - row, setColumnValue);
+  //
+  //  setColumnValue=0;
+  //  power = 8;
+  //  powerValue = 0;
+  //  for (int col = 8; col < 16; col++) {
+  //    power = power - 1;
+  //    if(matrix[row][col]==1){
+  //      powerValue = (int)1<<power;
+  //      setColumnValue = setColumnValue + powerValue;
+  //    }
+  //  }
+  //  lc.setColumn(1, 7 - row, setColumnValue);
+  //  benchMe();
+
 }
+
 
 //delete the euclidean sequence from internal array and from led screen
 void killMatrixRow(int row) {

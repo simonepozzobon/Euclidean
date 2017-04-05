@@ -1,28 +1,25 @@
-/*Step Sequencer with Euclidean Rythm Generator 
- 
-Creative Commons License
+/*Step Sequencer with Euclidean Rythm Generator
 
-Step Sequencer with Euclidean Rhythm Generator by Pantala Labs 
-is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-Based on a work at https://github.com/PantalaLabs/Euclidean.
+  Creative Commons License
 
-Gibran Curtiss Salomão. FEB/2017 - CC-BY-NC-SA
+  Step Sequencer with Euclidean Rhythm Generator by Pantala Labs
+  is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+  Based on a work at https://github.com/PantalaLabs/Euclidean.
+
+  Gibran Curtiss Salomão. FEB/2017 - CC-BY-NC-SA
 */
 
 #include <TimerOne.h>
 #include "LedControl.h"
 #include <Encoder.h>
 
-LedControl lc = LedControl(12, 11, 10, 2); //
 // pin 12 - DATA (data-DIN)
 // pin 11 - CLK  (CLOCK)
 // pin 10 - LOAD (CS)
+// 2 led matrix units
+LedControl lc = LedControl(12, 11, 10, 2); //
 
-boolean debug = false;            //very useful to enable / disable some codes from executing without change the entire code
-
-volatile unsigned long  tickInterval = 600;                         //time interval in ms between each interruption, would be cool if saved on EEPROM
-unsigned long           timerOneInterval = tickInterval * 1000 ;    //time interval in us for the TimerOne interruption
-boolean                 tickScreenState =  true;
+boolean                 tickScreenState =  false;
 
 //digital pins
 #define trigger0Pin          36   //trigger out pins to synth
@@ -84,8 +81,8 @@ long                    oldEncoderSpeedPosition  = 0;    //old speed encoder val
 int                     encoderShiftCounter;              //stores the encoder value for comparison
 int                     lastEncoderShiftCounter;          //stores the encoder value for comparison
 
-unsigned long           encoderSpeedValue =   50;         //start value to speed -> tick ->
-int                     encoderSpeedCenter =  50;         //start value to speed -> tick ->
+volatile long           encoderSpeedValue =   60;         //start value to speed -> tick ->
+int                     encoderSpeedCenter =  60;         //start value to speed -> tick ->
 #define                 encoderSpeedMinValue  15          //min value in ms for speed encoder 100ms
 #define                 encoderSpeedMaxValue  100         //max value in ms for speed encoder 1400ms
 #define                 encoderSpeedStepValue 10          //step value for speed encoder
@@ -94,7 +91,6 @@ boolean                 shiftEuclidean = false;
 boolean                 shiftEuclideanDirection = false;
 
 boolean                 triggersOpenState = true;  //triggers pin high/low state
-volatile boolean        externalClock     = true;  //internal / external clock
 volatile int            oldTickInterval   = 600;
 String                  E[17];                      //store euclidean calculated binary number
 
@@ -104,6 +100,10 @@ Encoder encoderB(22, 23);     //speed interface encoder
 
 volatile long benchTry = 1;
 volatile long benchMicros;
+
+volatile boolean        internalClock     = true;     //internal / external clock flag
+volatile unsigned long  tickInterval      = 600;      //time interval in ms between each interruption, would be cool if saved on EEPROM
+boolean                 debug             = true;    //very useful to enable / disable some codes from executing without change the entire code
 
 void setup()
 {
@@ -141,34 +141,15 @@ void setup()
     lc.clearDisplay(i);
   }
 
-  //load some euclidean test values -----------
-  calculateESequence(1, 4);
-  copyEtoMatrix(0, E[0]);
-  calculateESequence(5, 13);
-  copyEtoMatrix(1, E[0]);
-  calculateESequence(2, 4);
-  copyEtoMatrix(2, E[0]);
-  calculateESequence(1, 4);
-  copyEtoMatrix(3, E[0]);
-  calculateESequence(2, 5);
-  copyEtoMatrix(4, E[0]);
-  calculateESequence(7, 12);
-  copyEtoMatrix(5, E[0]);
-  calculateESequence(9, 13);
-  copyEtoMatrix(6, E[0]);
-  calculateESequence(4, 14);
-  copyEtoMatrix(7, E[0]);
-  //end of euclidean test values -----------
-
-  refreshLeds();                      //refresh screens
+  loadSavedState();
+  refreshLeds();
   
-  externalClock = digitalRead(clockInButtonPin);
-
   unsigned long now = millis();       //start the timers
   tickLast = now;
   bleenkTime = now;
-  Timer1.initialize(timerOneInterval);
+  Timer1.initialize(tickInterval * 1000);
   Timer1.attachInterrupt(tickInterrupt);
+  Timer1.restart();
 }
 
 
@@ -178,21 +159,20 @@ void setup()
 //because I had a lot of overhead into refreshing the led matrix
 //sometimes, delaying up to 30ms to fire the triggers pins :-(
 void tickInterrupt() {
-  if (externalClock) {
+  if (!internalClock) {
+    //if external clock , the tick is calculated by this interruption
     tickInterval = millis() - tickLast;
-    tickInterval = (tickInterval < (encoderSpeedMinValue*encoderSpeedStepValue)) ? (encoderSpeedMinValue*encoderSpeedStepValue) : tickInterval;   //minimum value of SpeedMinValue
-    tickLast = millis();
-    firetriggers();
-    tickScreenState = true;
+    if (tickInterval < (encoderSpeedMinValue * encoderSpeedStepValue)) {
+      tickInterval = encoderSpeedMinValue * encoderSpeedStepValue;   //minimum value of SpeedMinValue
+    }
   }
-  else {
-    tickLast = millis();
-    timerOneInterval = 1000 * tickInterval;
-    firetriggers();
-    tickScreenState = true;
-  }
+  tickLast = millis();
+  firetriggers();
+  tickScreenState = true;
 }
-void tickScreen() {               //refresh displays , update stepBar
+
+//refresh displays , update stepBar
+void tickScreen() {
   if (euclidParmTimedOut) {       //if not in euclidean state
     //switch off before BAR counter led
     if (sweepOldColumn >= 0) {
@@ -215,8 +195,12 @@ void loop()
   if (triggersOpenState) {                                   //if triggers are open, calculates the close condition
     if (thisLoop >= (tickLast + triggerTime)) {
       closetriggers();
-      if (!externalClock) {
-        Timer1.setPeriod(timerOneInterval);                 //update the main clock time
+      //update the main clock time
+      if (internalClock) {
+        Timer1.setPeriod(tickInterval * 1000);
+      }
+      if(sweepColumn==0){
+        saveStateStep();
       }
     }
   }
@@ -246,7 +230,7 @@ void loop()
         bleenkCursor();
         readEncoderShift();
         readJoystick();
-        if (!externalClock) {
+        if (internalClock) {
           readEncoderSpeed();
           readPauseButton();
         }
