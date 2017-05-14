@@ -18,36 +18,16 @@ void saveStateStep() {
   startSaveTime = millis();
 
   int rowValue;
-  int power;
-  int powerValue;
-
   int addr = 0;
-
   for (int row = 0; row < 8; row++) {
-    rowValue = 0;
-    power = 0;
-    for (int col = 7; col >= 0 ; col--) {
-      if (matrix[row][col]) {
-        powerValue = (int)1 << power;
-        rowValue = rowValue + powerValue;
-      }
-      power++;
-    }
+    rowValue = convertMatrixRowToInteger(row, 7);
     EEPROM.write(addr, rowValue);
     addr = addr + 1;
     Serial.println(rowValue);
   }
 
   for (int row = 0; row < 8; row++) {
-    rowValue = 0;
-    power = 0;
-    for (int col = 15; col >= 8; col--) {
-      if (matrix[row][col]) {
-        powerValue = (int)1 << power;
-        rowValue = rowValue + powerValue;
-      }
-      power++;
-    }
+    rowValue = convertMatrixRowToInteger(row, 15);
     EEPROM.write(addr, rowValue);
     addr = addr + 1;
     Serial.println(rowValue);
@@ -69,9 +49,9 @@ int loadSavedState() {
   for (int row = 0; row < 8; row++) {
     rowValue = EEPROM.read(addr);
     addr = addr + 1;
-    for (int col = 0; col < 8; col++) {
+    for (int col = 7; col >= 0; col--) {
       if (rowValue & (1 << col)) {
-        matrix[row][col] = true;
+        matrix[row][7-col] = true;
       }
     }
     Serial.println(rowValue);
@@ -80,9 +60,9 @@ int loadSavedState() {
   for (int row = 0; row < 8; row++) {
     rowValue = EEPROM.read(addr);
     addr = addr + 1;
-    for (int col = 0; col < 8 ; col++) {
+    for (int col = 7; col >= 0 ; col--) {
       if (rowValue & (1 << col)) {
-        matrix[row][8+col] = true;
+        matrix[row][(7-col)+8] = true;
       }
     }
     Serial.println(rowValue);

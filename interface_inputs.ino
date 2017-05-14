@@ -11,6 +11,13 @@
 
 
 //clock source button
+void readSavePatternsButton() {
+  if (digitalRead(savePatternPin) == HIGH) {
+    systemMessage = 1;
+    markThisEvent();
+    interfaceDebounce = interfaceSuperDebounce;
+  }
+}
 void readClockSourceButton() {
   if (digitalRead(clockInButtonPin) == HIGH) {
     if (internalClock) {
@@ -30,6 +37,7 @@ void readClockSourceButton() {
       Timer1.attachInterrupt(tickInterrupt);
       Timer1.restart();
     }
+    Serial.println(internalClock);
     markThisEvent();
     interfaceDebounce = interfaceSuperDebounce;
   }
@@ -63,8 +71,8 @@ void readEncoderShift() {
         shiftMatrixRow(joyCursor[1], false);
       }
       oldEncoderShiftPosition = newEncoderShiftPosition;        //update old position with  new position
-      interfaceDebounce = interfaceSuperDebounce;
       markThisEvent();
+      interfaceDebounce = interfaceSuperDebounce;
     }
   }
 }
@@ -82,7 +90,6 @@ void readEncoderSpeed() {
     }
     oldEncoderSpeedPosition = newEncoderSpeedPosition;
     tickInterval = encoderSpeedValue * encoderSpeedStepValue;         //sets the tickInterval variable with the new calculated interval
-    interfaceDebounce = interfaceNormalDebounce;
     markThisEvent();
   }
 }
@@ -104,7 +111,6 @@ void readEncoderEuclidKParm() {
       }
       changeEuclidScreen(euclidParm1 , euclidParm2);
       oldEncoderKPosition = newEncoderKPosition;            //update old position with  new position
-      interfaceDebounce = interfaceNormalDebounce;
       markThisEvent();
     }
   }
@@ -126,7 +132,6 @@ void readEncoderEuclidNParm() {
       }
       changeEuclidScreen(euclidParm1 , euclidParm2);
       oldEncoderNPosition = newEncoderNPosition;              //update old position with  new position
-      interfaceDebounce = interfaceNormalDebounce;
       markThisEvent();
     }
   }
@@ -160,8 +165,8 @@ void readJoystick() {
       }
       lc.setLed(joyCursor[0] / 8, joyCursor[0] % 8, 7 - joyCursor[1], true);
       lc.setLed(joyOldY / 8, joyOldY % 8, 7 - joyOldX , matrix[joyOldX][joyOldY]);
-      interfaceDebounce = interfaceSuperDebounce;
       markThisEvent();
+      interfaceDebounce = interfaceSuperDebounce;
     }
   }
 }
@@ -193,8 +198,8 @@ void readPauseButton() {
 void readKillButton() {
   if (digitalRead(removeEuclidPin) == HIGH) {
     killMatrixRow(joyCursor[1]);
-    interfaceDebounce = interfaceSuperDebounce;
     markThisEvent();
+    interfaceDebounce = interfaceSuperDebounce;
   }
 }
 
@@ -202,8 +207,8 @@ void readKillButton() {
 void readResetButton() {
   if (digitalRead(resetPin) == HIGH) {
     sweepColumn = 0;
-    interfaceDebounce = interfaceSuperDebounce;
     markThisEvent();
+    interfaceDebounce = interfaceSuperDebounce;
   }
 }
 
@@ -213,8 +218,8 @@ void readAddDotButton() {
   if (digitalRead(addDotPin) == HIGH) {
     matrix[joyCursor[1]][joyCursor[0]] = !matrix[joyCursor[1]][joyCursor[0]];
     lc.setLed(joyCursor[0] / 8, joyCursor[0] % 8, 7 - joyCursor[1], matrix[joyCursor[1]][joyCursor[0]]);
-    interfaceDebounce = interfaceSuperDebounce;
     markThisEvent();
+    interfaceDebounce = interfaceSuperDebounce;
   }
 }
 
@@ -222,8 +227,8 @@ void readAddDotButton() {
 void readNewEuclidButton() {
   if (digitalRead(addEuclidPin) == HIGH) {
     changeEuclidScreen(euclidParm1, euclidParm2);
-    interfaceDebounce = interfaceSuperDebounce;
     markThisEvent();
+    interfaceDebounce = interfaceSuperDebounce;
   }
 }
 
@@ -242,14 +247,13 @@ void readAddEuclidButton() {
       lc.setLed(col / 8, col % 8, 7 - joyCursor[1], matrix[joyCursor[1]][col]);
     }
     lc.setLed(joyCursor[0] / 8, joyCursor[0] % 8, 7 - joyCursor[1], true);    //restores the blink led
-    interfaceDebounce = interfaceSuperDebounce;
     markThisEvent();
+    interfaceDebounce = interfaceSuperDebounce;
   }
 }
 
 //if there was a time out on euclidean state , come back to mais state - restores the full led matrix
 void giveUpAddEuclid() {
-  markThisEvent();
   euclidParmTimedOut = true;                      //euclidean state is off
   for (int row = 0; row < 2; row++) {             //restores just the rows 0 and 1 cleared before
     for (int col = 0; col < 16; col++) {
@@ -257,8 +261,8 @@ void giveUpAddEuclid() {
     }
   }
   lc.setLed(joyCursor[0] / 8, joyCursor[0] % 8, 7 - joyCursor[1], true);    //restores the blink led
-  interfaceDebounce = interfaceSuperDebounce;
   markThisEvent();
+  interfaceDebounce = interfaceSuperDebounce;
 }
 
 //shift the euclidean sequence backward or forward
@@ -282,36 +286,16 @@ void shiftMatrixRow(int row, boolean way) {
   }
   //update the screens
 
-  for (int col = 0; col < 16; col++) {
-    lc.setLed(col / 8, col % 8, 7 - row, matrix[row][col]);
+  if(AIS){
+    Serial.println(convertMatrixRowToInteger(row, 7));
+    Serial.println(convertMatrixRowToInteger(row, 15));
+    lc.setRow(0, row, convertMatrixRowToInteger(row, 7));    
+    lc.setRow(1, row, convertMatrixRowToInteger(row, 15));
+  }else{
+    for (int col = 0; col < 16; col++) {
+      lc.setLed(col / 8, col % 8, 7 - row, matrix[row][col]);
+    }
   }
-
-  //  //update the screens
-  //  int setColumnValue = 0;
-  //  int power = 8;
-  //  int powerValue = 0;
-  //  for (int col = 0; col < 8; col++) {
-  //    power = power - 1;
-  //    if(matrix[row][col]==1){
-  //      powerValue = (int)1<<power;
-  //      setColumnValue = setColumnValue + powerValue;
-  //    }
-  //  }
-  //  lc.setColumn(0, 7 - row, setColumnValue);
-  //
-  //  setColumnValue=0;
-  //  power = 8;
-  //  powerValue = 0;
-  //  for (int col = 8; col < 16; col++) {
-  //    power = power - 1;
-  //    if(matrix[row][col]==1){
-  //      powerValue = (int)1<<power;
-  //      setColumnValue = setColumnValue + powerValue;
-  //    }
-  //  }
-  //  lc.setColumn(1, 7 - row, setColumnValue);
-  //  benchMe();
-
 }
 
 
@@ -353,5 +337,6 @@ void killMatrixRow(int row) {
 //this function saves the time that ocured any kind of human interface input
 void markThisEvent() {
   interfaceEvent = millis();
+  interfaceDebounce = interfaceNormalDebounce;
 }
 
