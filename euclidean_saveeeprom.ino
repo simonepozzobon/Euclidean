@@ -92,9 +92,9 @@ int                     encoderSpeedCenter =  60;         //start value to speed
 boolean                 shiftEuclidean = false;
 boolean                 shiftEuclideanDirection = false;
 
-boolean                 triggersOpenState = true;  //triggers pin high/low state
+boolean                 triggersOpenState = true;         //triggers pin high/low state
 volatile int            oldTickInterval   = 600;
-String                  E[17];                      //store euclidean calculated binary number
+String                  E[17];                            //store euclidean calculated binary number
 
 
 Encoder encoderA(8, 9);       //shift interface encoder
@@ -105,7 +105,7 @@ volatile long benchMicros;
 
 volatile boolean        internalClock     = true;     //internal / external clock flag
 volatile unsigned long  tickInterval      = 600;      //time interval in ms between each interruption, would be cool if saved on EEPROM
-boolean                 debug             = true;    //very useful to enable / disable some codes from executing without change the entire code
+boolean                 debug             = false;    //very useful to enable / disable some codes from executing without change the entire code
 
 int systemMessage;
 
@@ -134,12 +134,6 @@ void setup()
   pinMode(addDotPin, INPUT);
   pinMode(addEuclidPin, INPUT);
   pinMode(savePatternPin, INPUT);
-
-  //  for (int i = 0; i < matrixDim0; i++) {      //clear the led matrix
-  //    for (int j = 0; j < matrixDim1; j++) {
-  //      matrix[i][j] = false;
-  //    }
-  //  }
 
   for (int i = 0; i < 2; i++) {               //setup and clears the screens
     lc.shutdown(i, false);

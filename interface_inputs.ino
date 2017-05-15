@@ -97,6 +97,7 @@ void readEncoderSpeed() {
 //read the K euclidean encoder
 void readEncoderEuclidKParm() {
   long newEncoderKPosition = encoderA.read();
+  oldEncoderShiftPosition = newEncoderKPosition;          //have to update the speed position because it uses the same rotary 
   if (newEncoderKPosition != oldEncoderKPosition) {       //if there was a change in encoder position
     if ( (newEncoderKPosition % 4) == 0 ) {               //mod 4 changes (debounce like to make the interface less sensitive)
       if (newEncoderKPosition < oldEncoderKPosition) {
@@ -118,6 +119,7 @@ void readEncoderEuclidKParm() {
 
 void readEncoderEuclidNParm() {
   long newEncoderNPosition = encoderB.read();
+  oldEncoderSpeedPosition = newEncoderNPosition;            //have to update the speed position because it uses the same rotary 
   if (newEncoderNPosition != oldEncoderNPosition) {         //if there was a change in encoder position
     if ( (newEncoderNPosition % 4) == 0 ) {                 //mod 4 changes (debounce like to make the interface less sensitive)
       if (newEncoderNPosition < oldEncoderNPosition) {

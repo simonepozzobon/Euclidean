@@ -1,12 +1,12 @@
-/*Step Sequencer with Euclidean Rythm Generator 
- 
-Creative Commons License
+/*Step Sequencer with Euclidean Rythm Generator
 
-Step Sequencer with Euclidean Rhythm Generator by Pantala Labs 
-is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-Based on a work at https://github.com/PantalaLabs/Euclidean.
+  Creative Commons License
 
-Gibran Curtiss Salomão. FEB/2017 - CC-BY-NC-SA
+  Step Sequencer with Euclidean Rhythm Generator by Pantala Labs
+  is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+  Based on a work at https://github.com/PantalaLabs/Euclidean.
+
+  Gibran Curtiss Salomão. FEB/2017 - CC-BY-NC-SA
 */
 
 //calculate the euclidean sequence using K and N parameters
@@ -48,7 +48,9 @@ void calculateESequence(int k, int n) {
     E[0] = E[0] + E[0].substring(progression, progression + 1);
     progression++;
   }
-
+  if ((k == 1) && (n == 1)) {
+    E[0] = E[0] + "1";
+  }
 }
 
 //part of euclidean function.
