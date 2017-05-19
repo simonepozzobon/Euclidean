@@ -23,6 +23,10 @@ Other resources are available:
 <li>clock in.
 </ul>
 
+TimerOne Library :
+https://code.google.com/archive/p/arduino-timerone/downloads
+
+
 The <a href="http://aisynthesis.com/">AI Syntehsis</a> is working on prototyping the module.
 
 Please, contact me if you want to make anything commercially.
